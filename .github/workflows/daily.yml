@@ -2,7 +2,7 @@ name: daily-job-digest
 
 on:
   schedule:
-    - cron: '0 13 * * *'   # 13:00 UTC = 08:00 Perú (UTC-5)
+    - cron: '0 2 * * *'    # 02:00 UTC = 21:00 Perú (UTC-5)
   workflow_dispatch: {}
 
 jobs:
