@@ -12,25 +12,31 @@ function makeRanked(n: number): RankedJob[] {
       title: `Software Engineer ${i}`,
       companyName: `Company ${i}`,
       jobUrl: `https://example.com/job/${i}`,
+      companyUrl: `https://company${i}.com`,
       location: { city: 'Lima, Peru' },
-      isRemote: i % 2 === 0,
+      isRemote: true,
       datePosted: '2026-06-27',
     },
   }));
 }
 
 describe('buildMessages', () => {
-  it('incluye header con fecha y resumen', () => {
+  it('incluye header con fecha', () => {
     const msgs = buildMessages(makeRanked(1), 'Perfil de prueba');
     expect(msgs[0]).toContain('Chamba Radar');
-    expect(msgs[0]).toContain('Perfil de prueba');
   });
 
-  it('incluye título y empresa de cada empleo', () => {
+  it('incluye título, empresa y URL de aplicación', () => {
     const msgs = buildMessages(makeRanked(3), 'Resumen');
     const full = msgs.join('\n');
     expect(full).toContain('Software Engineer 0');
     expect(full).toContain('Company 2');
+    expect(full).toContain('https://example.com/job/0');
+  });
+
+  it('incluye URL de la empresa cuando está disponible', () => {
+    const msgs = buildMessages(makeRanked(1), 'Resumen');
+    expect(msgs[0]).toContain('https://company0.com');
   });
 
   it('respeta TOP_N y no duplica', () => {
@@ -56,10 +62,5 @@ describe('buildMessages', () => {
     const msgs = buildMessages(ranked, 'Resumen');
     expect(msgs.length).toBeGreaterThan(1);
     for (const m of msgs) expect(m.length).toBeLessThanOrEqual(4000);
-  });
-
-  it('marca remoto correctamente', () => {
-    const msgs = buildMessages(makeRanked(1), 'Resumen');
-    expect(msgs[0]).toContain('Remoto');
   });
 });

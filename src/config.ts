@@ -21,10 +21,17 @@ const schema = z.object({
   }),
   data: z.object({
     cvPath: z.string().default('data/cv.md'),
+    cvEsPath: z.string().optional(),
     preferencesPath: z.string().default('data/preferences.md'),
   }),
   topN: z.coerce.number().int().positive().default(5),
+  resultsPerQuery: z.coerce.number().int().positive().default(5),
   dryRun: z.boolean().default(false),
+  search: z.object({
+    sites: z.string().transform((s) => s.split(',').map((x) => x.trim()).filter(Boolean)),
+    remoteOnly: z.boolean(),
+    hoursOld: z.coerce.number().int().positive().default(24),
+  }),
 });
 
 function loadConfig() {
@@ -48,10 +55,17 @@ function loadConfig() {
     },
     data: {
       cvPath: process.env['CV_PATH'],
+      cvEsPath: process.env['CV_ES_PATH'],
       preferencesPath: process.env['PREFERENCES_PATH'],
     },
     topN: process.env['TOP_N_RESULTS'],
+    resultsPerQuery: process.env['RESULTS_PER_QUERY'],
     dryRun: process.env['DRY_RUN'] === '1',
+    search: {
+      sites: process.env['SEARCH_SITES'] ?? 'linkedin,indeed,wellfound,remoteok,getonboard',
+      remoteOnly: process.env['REMOTE_ONLY'] !== '0',
+      hoursOld: process.env['HOURS_OLD'],
+    },
   });
 
   if (!result.success) {

@@ -7,20 +7,18 @@ export function buildMessages(ranked: RankedJob[], profileSummary: string): stri
     day: '2-digit', month: '2-digit', year: 'numeric',
   });
 
-  const header = `🎯 *Chamba Radar* — ${today}\n${profileSummary}\n\n*Top ${ranked.length} empleos del día:*\n\n`;
+  const header = `🎯 *Chamba Radar* — ${today}\n\n`;
 
   const cards = ranked.map((r, i) => {
     const j = r.job;
-    const loc = j.isRemote
-      ? '🌐 Remoto'
-      : j.location?.city ?? j.location?.country ?? 'N/A';
-    const salary = j.compensation?.minAmount
-      ? ` · 💰 ${j.compensation.currency ?? '$'}${j.compensation.minAmount.toLocaleString()}`
-      : '';
-    const date = j.datePosted ? ` · 📅 ${j.datePosted}` : '';
-    const link = j.jobUrl ? `\n🔗 ${j.jobUrl}` : '';
+    const companyLine = j.companyName ?? 'N/A';
+    const applyUrl = j.jobUrl ?? '';
+    const companyUrl = j.companyUrlDirect ?? j.companyUrl ?? '';
 
-    return `*${i + 1}. ${j.title}*\n🏢 ${j.companyName ?? 'N/A'} · 📍 ${loc}${salary}${date}\n💡 ${r.reason}${link}`;
+    let card = `*${i + 1}. ${j.title}*\n🏢 ${companyLine}\n💡 ${r.reason}`;
+    if (applyUrl) card += `\n🔗 ${applyUrl}`;
+    if (companyUrl) card += `\n🌐 ${companyUrl}`;
+    return card;
   });
 
   return splitIntoMessages(header, cards);
@@ -31,7 +29,7 @@ function splitIntoMessages(header: string, cards: string[]): string[] {
   let current = header;
 
   for (const card of cards) {
-    const separator = '\n\n---\n\n';
+    const separator = '\n\n';
     if ((current + separator + card).length > MAX_MSG_CHARS && current !== header) {
       messages.push(current.trimEnd());
       current = card;

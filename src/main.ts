@@ -11,12 +11,18 @@ import { sendWhatsApp } from './whatsapp/whareminder-client.js';
 async function main() {
   logger.info('=== Chamba Radar iniciando ===');
 
-  // 1. Leer CV y preferencias
-  const [cvContent, preferencesContent] = await Promise.all([
+  // 1. Leer CV(s) y preferencias
+  const [cvEn, cvEs, preferencesContent] = await Promise.all([
     readFile(config.data.cvPath, 'utf-8'),
+    config.data.cvEsPath ? readFile(config.data.cvEsPath, 'utf-8').catch(() => null) : Promise.resolve(null),
     readFile(config.data.preferencesPath, 'utf-8'),
   ]);
-  logger.info(`CV cargado (${cvContent.length} chars), preferencias (${preferencesContent.length} chars)`);
+
+  const cvContent = cvEs
+    ? `${cvEn}\n\n---\n\n## CV en Español\n\n${cvEs}`
+    : cvEn;
+
+  logger.info(`CV cargado (${cvContent.length} chars${cvEs ? ', bilingüe EN+ES' : ''}), preferencias (${preferencesContent.length} chars)`);
 
   // 2. Construir perfil y queries con IA
   const llm = createLlmClient(config.llm);
@@ -26,8 +32,8 @@ async function main() {
   logger.info(`Queries generadas: ${profile.searchQueries.length}`);
 
   // 3. Buscar empleos en ever-jobs
-  logger.info(`Buscando empleos en ${config.everJobs.apiUrl}...`);
-  const jobs = await searchJobs(config.everJobs.apiUrl, profile.searchQueries);
+  logger.info(`Buscando empleos en ${config.everJobs.apiUrl} (${config.resultsPerQuery} por query, sites: ${config.search.sites.join(',')}, remoto: ${config.search.remoteOnly}, últimas ${config.search.hoursOld}h)...`);
+  const jobs = await searchJobs(config.everJobs.apiUrl, profile.searchQueries, config.resultsPerQuery, config.search);
   logger.info(`Total empleos únicos: ${jobs.length}`);
 
   if (jobs.length === 0) {

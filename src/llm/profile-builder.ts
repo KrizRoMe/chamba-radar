@@ -4,11 +4,7 @@ import type { LlmClient } from './llm-client.js';
 const SearchQuerySchema = z.object({
   searchTerm: z.string(),
   location: z.string().optional(),
-  isRemote: z.boolean().optional(),
   country: z.string().optional(),
-  resultsWanted: z.number().int().positive().default(20),
-  hoursOld: z.number().int().positive().default(72),
-  siteType: z.array(z.string()).optional(),
 });
 
 const HardFiltersSchema = z.object({
@@ -18,7 +14,7 @@ const HardFiltersSchema = z.object({
 
 const ProfileSchema = z.object({
   profileSummary: z.string(),
-  searchQueries: z.array(SearchQuerySchema).min(1),
+  searchQueries: z.array(SearchQuerySchema).min(4),
   hardFilters: HardFiltersSchema,
 });
 
@@ -33,11 +29,18 @@ export async function buildProfile(
   return llm.chatJson(ProfileSchema, [
     {
       role: 'system',
-      content: `Eres un asistente experto en búsqueda de empleo.
-Dado un CV y preferencias laborales, genera un objeto JSON con:
-- profileSummary: resumen breve en 2-3 oraciones del candidato y su perfil
-- searchQueries: array de 2-4 búsquedas óptimas para encontrar empleos relevantes
-  (campos: searchTerm, location, isRemote, country, resultsWanted, hoursOld, siteType)
+      content: `Eres un asistente experto en búsqueda de empleo internacional.
+Dado un CV (puede estar en inglés y español) y preferencias laborales, genera un objeto JSON con:
+- profileSummary: resumen breve en 2-3 oraciones del candidato y su perfil (en español)
+- searchQueries: array de 4-6 búsquedas óptimas que cubran TANTO inglés COMO español.
+  Reglas obligatorias:
+  * Al menos 2 queries con searchTerm en INGLÉS (ej: "full stack engineer", "backend developer")
+  * Al menos 2 queries con searchTerm en ESPAÑOL (ej: "desarrollador full stack", "ingeniero backend")
+  * Varía los términos: usa sinónimos, tecnologías clave del CV, y diferentes niveles de especificidad
+  * Campos disponibles: searchTerm, location, country
+  * IMPORTANTE — country debe ser exactamente uno de estos valores en MAYÚSCULAS: PERU, USA, UK, SPAIN, MEXICO, ARGENTINA, COLOMBIA, CHILE, WORLDWIDE. Si no aplica, omite el campo.
+  * location es texto libre (ciudad, país), úsalo solo si la búsqueda requiere una ubicación específica.
+  * NO incluyas campos isRemote, siteType ni hoursOld — esos se controlan externamente.
 - hardFilters: filtros excluyentes (excludeKeywords, minSalaryUsd)
 
 Responde SOLO con el JSON válido, sin explicaciones ni markdown extra.`,
