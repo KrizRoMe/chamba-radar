@@ -1,0 +1,27 @@
+{
+  "name": "chamba-radar",
+  "version": "1.0.0",
+  "description": "Daily job digest sent to WhatsApp, powered by ever-jobs + MiniMax AI",
+  "type": "module",
+  "scripts": {
+    "daily": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "Krizrome",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.3",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "openai": "^4.67.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

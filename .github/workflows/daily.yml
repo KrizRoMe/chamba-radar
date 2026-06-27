@@ -1,0 +1,56 @@
+name: daily-job-digest
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 13:00 UTC = 08:00 Perú (UTC-5)
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    services:
+      ever-jobs:
+        image: ghcr.io/ever-jobs/ever-jobs:latest
+        ports:
+          - 3001:3001
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PULL_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Esperar a que ever-jobs esté listo
+        run: |
+          echo "Esperando que ever-jobs arranque..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3001/api/sources/health > /dev/null 2>&1; then
+              echo "ever-jobs listo!"
+              exit 0
+            fi
+            echo "  Intento $i/60..."
+            sleep 2
+          done
+          echo "ever-jobs no respondió a tiempo"
+          exit 1
+
+      - name: Ejecutar digest diario
+        run: pnpm run daily
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          WHAREMINDER_API_KEY: ${{ secrets.WHAREMINDER_API_KEY }}
+          EVER_JOBS_API_URL: http://localhost:3001
+          WHATSAPP_TARGET_PHONE: ${{ secrets.WHATSAPP_TARGET_PHONE }}
