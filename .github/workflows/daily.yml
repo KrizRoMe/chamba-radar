@@ -8,6 +8,9 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
 
     services:
       ever-jobs:
@@ -16,7 +19,7 @@ jobs:
           - 3001:3001
         credentials:
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PULL_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
