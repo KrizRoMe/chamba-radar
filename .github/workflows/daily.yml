@@ -5,7 +5,7 @@ on:
     # GitHub Actions corre los cron "best-effort": el minuto :00 es el más
     # congestionado y puede retrasarse horas. Usamos un minuto raro y adelantamos
     # un poco para dar margen y aún así llegar cerca de las 21:00 Perú.
-    - cron: '43 1 * * *'   # 01:43 UTC ≈ 20:43 Perú (UTC-5)
+    - cron: "43 1 * * *" # 01:43 UTC ≈ 20:43 Perú (UTC-5)
   workflow_dispatch: {}
 
 jobs:
@@ -62,7 +62,7 @@ jobs:
           WHAREMINDER_TEMPLATE_ID: ${{ secrets.WHAREMINDER_TEMPLATE_ID }}
           EVER_JOBS_API_URL: http://localhost:3001
           WHATSAPP_TARGET_PHONE: ${{ secrets.WHATSAPP_TARGET_PHONE }}
-          SEARCH_SITES: linkedin,getonboard,remoteok,remotive,himalayas
+          SEARCH_SITES: linkedin,getonboard,remoteok,remotive,indeed
           REMOTE_ONLY: "1"
           HOURS_OLD: "48"
           TOP_N_RESULTS: "5"
