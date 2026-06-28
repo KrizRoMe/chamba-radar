@@ -2,7 +2,10 @@ name: daily-job-digest
 
 on:
   schedule:
-    - cron: '0 2 * * *'    # 02:00 UTC = 21:00 Perú (UTC-5)
+    # GitHub Actions corre los cron "best-effort": el minuto :00 es el más
+    # congestionado y puede retrasarse horas. Usamos un minuto raro y adelantamos
+    # un poco para dar margen y aún así llegar cerca de las 21:00 Perú.
+    - cron: '43 1 * * *'   # 01:43 UTC ≈ 20:43 Perú (UTC-5)
   workflow_dispatch: {}
 
 jobs:
